@@ -8,13 +8,14 @@
  */
 
 #include <iostream>
+#include <string>
 
 // a global array probs. or not even global but it has to be shared atleast 
 
 // main
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        std::cout << "Usage: ./quicksort <len>" << std::endl;
+        std::cout << "Invalid argument, usage: ./quicksort <len>" << std::endl;
         return 0;
     }
 
@@ -30,7 +31,8 @@ int main(int argc, char *argv[]) {
     }
 
     if (n < 0) {
-        std::cout << "Invalid length of array, can't have negative length" << std::endl;
+        std::cerr << "Invalid length of array, can't have negative length" << std::endl;
+        return 0;
     }
 
     return 0;
@@ -40,6 +42,8 @@ int main(int argc, char *argv[]) {
 void setup() {
 
 }
+
+// make classes instead. one data class and one quicksort class. one testing?
 
 // generate array of ints
 void generate_array() {
