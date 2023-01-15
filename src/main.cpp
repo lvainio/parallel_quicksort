@@ -7,10 +7,12 @@
  * Run: ./quicksort <size>
  */
 
+#include <cstdlib>
 #include <iostream>
 #include <string>
 
-// a global array probs. or not even global but it has to be shared atleast 
+int n;
+int* nums;
 
 // main
 int main(int argc, char *argv[]) {
@@ -19,7 +21,6 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    int n;
     try {    
         n = std::stoi(argv[1]);
     } catch (const std::invalid_argument& ia) {
@@ -35,20 +36,33 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
+    generate_array(n);
+    
+    free(nums);
     return 0;
 }
 
-// shared mem and blablabla
-void setup() {
-
-}
-
-// make classes instead. one data class and one quicksort class. one testing?
-
-// generate array of ints
+// generate_array fills nums with random integers ranging from 0 to RAND_MAX.
 void generate_array() {
+    nums = (int*) malloc(n * sizeof(int));
+    for (size_t i = 0; i < n; i++) {
+        nums[i] = rand();
+    }
+}
+
+// print_array prints out the contents of nums.
+void print_array() {
+    for (size_t i = 0; i < n; i++) {
+        std::cout << nums[i];
+    }
+}
+
+// quick_sort is a standard non-parallelized implementation of quick_sort.
+void quick_sort() {
 
 }
+
+
 
 // parallel_quicksort is a parallelized implementation of the famous quicksort algorithm. 
 void parallel_quicksort() {
