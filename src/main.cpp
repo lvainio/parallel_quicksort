@@ -3,13 +3,16 @@
  * 
  * Author: Leo Vainio
  * 
- * Compile: gcc -o quicksort parallel_quicksort.cpp -lstdc++
+ * Compile: gcc -o quicksort main.cpp -lstdc++
  * Run: ./quicksort <size>
  */
 
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
 #include <string>
+
+#include "main.h"
 
 int n;
 int* nums;
@@ -37,9 +40,7 @@ int main(int argc, char *argv[]) {
     }
 
     generate_array();
-    print_array();
     quick_sort(0, n-1);
-    print_array();
 
     free(nums);
     return 0;
@@ -47,6 +48,7 @@ int main(int argc, char *argv[]) {
 
 // generate_array fills nums with random integers ranging from 0 to RAND_MAX.
 void generate_array() {
+    srand(time(NULL));
     nums = (int*) malloc(n * sizeof(int));
     for (size_t i = 0; i < n; i++) {
         nums[i] = rand();
@@ -55,9 +57,14 @@ void generate_array() {
 
 // print_array prints out the contents of nums.
 void print_array() {
+    std::cout << "nums: {";
     for (size_t i = 0; i < n; i++) {
         std::cout << nums[i];
+        if (i != n-1) {
+            std::cout << ", ";
+        }
     }
+    std::cout << "}" << std::endl;
 }
 
 // quick_sort is a standard non-parallelized implementation of quick_sort.
@@ -69,30 +76,30 @@ void quick_sort(int left, int right) {
 	}
 }
 
+// partition picks the last element of the subarray as pivot and partitions
+// lower elements to the "left" and higher elements to the "right" of the pivot.
 int partition(int left, int right) {
     int pivot = nums[right];
     int i = left - 1;
     for(int j = left; j < right; j++) {
         if(nums[j] <= pivot) {
             i++;
-            swap(i, j);
+            std::swap(nums[i], nums[j]);
         }
     }
-    swap(i + 1, right);
+    std::swap(nums[i + 1], nums[right]);
     return i + 1;
 }
 
-void swap(int i, int j) {
-    int temp = nums[i];
-    nums[i] = nums[j];
-    nums[j] = temp;
-}
-
-
-
 // parallel_quicksort is a parallelized implementation of the famous quicksort algorithm. 
 void parallel_quicksort() {
-    std::cout << "hej" << std::endl;
+    // the calls to quick_sort can be done in threads. 
+    // maybe have a cutoff point? at like size 20 subarray or more. cuz of overhead
+
+    // call the two threads then wait(). or join().
+
+    // this will depend alot on how the join() functions. because if it is a global thing then
+    // this will not work and we will need some other way of synchronizing. 
 }
 
 // google test.
