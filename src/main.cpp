@@ -37,7 +37,10 @@ int main(int argc, char *argv[]) {
     }
 
     generate_array();
-    
+    print_array();
+    quick_sort(0, n-1);
+    print_array();
+
     free(nums);
     return 0;
 }
@@ -58,8 +61,31 @@ void print_array() {
 }
 
 // quick_sort is a standard non-parallelized implementation of quick_sort.
-void quick_sort() {
+void quick_sort(int left, int right) {
+    if(left < right) {
+        int pivot = partition(left, right);
+        quick_sort(left, pivot - 1);
+        quick_sort(pivot + 1, right);
+	}
+}
 
+int partition(int left, int right) {
+    int pivot = nums[right];
+    int i = left - 1;
+    for(int j = left; j < right; j++) {
+        if(nums[j] <= pivot) {
+            i++;
+            swap(i, j);
+        }
+    }
+    swap(i + 1, right);
+    return i + 1;
+}
+
+void swap(int i, int j) {
+    int temp = nums[i];
+    nums[i] = nums[j];
+    nums[j] = temp;
 }
 
 
