@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    generate_array(n);
+    generate_array();
     
     free(nums);
     return 0;
