@@ -1,9 +1,14 @@
 #ifndef HEADERFILE_H
 #define HEADERFILE_H
 
-int partition(int, int);
+struct Args {
+    int left;
+    int right;
+};
+
+int partition(Args);
 void generate_array();
 void print_array();
-void quick_sort(int, int);
+void quick_sort(Args);
 
 #endif

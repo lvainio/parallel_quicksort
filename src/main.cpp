@@ -3,19 +3,22 @@
  * 
  * Author: Leo Vainio
  * 
- * Compile: gcc -o quicksort main.cpp -lstdc++
+ * Compile: gcc -o quicksort main.cpp -lstdc++ -pthread
  * Run: ./quicksort <size>
  */
 
 #include <cstdlib>
 #include <ctime>
 #include <iostream>
+#include <pthread.h>
 #include <string>
 
-#include "main.h"
+#include "main.hpp"
 
 int n;
 int* nums;
+
+
 
 // main
 int main(int argc, char *argv[]) {
@@ -40,7 +43,11 @@ int main(int argc, char *argv[]) {
     }
 
     generate_array();
-    quick_sort(0, n-1);
+
+    // TIME
+    quick_sort((Args){0, n-1});
+    // END TIME
+    // print time taken to execute
 
     free(nums);
     return 0;
@@ -68,31 +75,35 @@ void print_array() {
 }
 
 // quick_sort is a standard non-parallelized implementation of quick_sort.
-void quick_sort(int left, int right) {
+void quick_sort(Args args) {
     if(left < right) {
-        int pivot = partition(left, right);
-        quick_sort(left, pivot - 1);
-        quick_sort(pivot + 1, right);
+        int pivot = partition((Args){args.left, args.right});
+        quick_sort((Args){args.left, pivot - 1});
+        quick_sort((Args){pivot + 1, args.right});
 	}
 }
 
 // partition picks the last element of the subarray as pivot and partitions
 // lower elements to the "left" and higher elements to the "right" of the pivot.
-int partition(int left, int right) {
-    int pivot = nums[right];
-    int i = left - 1;
-    for(int j = left; j < right; j++) {
+int partition(Args args) {
+    int pivot = nums[args.right];
+    int i = args.left - 1;
+    for(int j = args.left; j < args.right; j++) {
         if(nums[j] <= pivot) {
             i++;
             std::swap(nums[i], nums[j]);
         }
     }
-    std::swap(nums[i + 1], nums[right]);
+    std::swap(nums[i + 1], nums[args.right]);
     return i + 1;
 }
 
 // parallel_quicksort is a parallelized implementation of the famous quicksort algorithm. 
 void parallel_quicksort() {
+    pthread_t t_right;
+    pthread_t t_left;
+
+
     // the calls to quick_sort can be done in threads. 
     // maybe have a cutoff point? at like size 20 subarray or more. cuz of overhead
 
@@ -100,9 +111,8 @@ void parallel_quicksort() {
 
     // this will depend alot on how the join() functions. because if it is a global thing then
     // this will not work and we will need some other way of synchronizing. 
-}
 
-// google test.
-void testing() {
+    // we do however have the Thread ID so it might be possible. 
 
+    // maybe just make this implementation and see what happens cuz then i wlil realise what the problem is. if any
 }
