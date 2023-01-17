@@ -13,5 +13,6 @@ void quick_sort(Args);
 void* parallel_quicksort(void*);
 void swap(int, int);
 void test();
+double read_timer();
 
 #endif

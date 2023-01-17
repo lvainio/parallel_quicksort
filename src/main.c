@@ -11,6 +11,9 @@
 #include <stdio.h> 
 #include <stdlib.h>
 
+#include <time.h>
+#include <sys/time.h>
+
 #include "main.h"
 
 int n;
@@ -31,6 +34,9 @@ int main(int argc, char *argv[]) {
 
     generate_array();
 
+    double start_time, end_time;
+    start_time = read_timer();
+
     // TIME
     // print_array();
     // quick_sort((Args){0, n-1});
@@ -45,6 +51,9 @@ int main(int argc, char *argv[]) {
     print_array();
     // END TIME
     // PRINT TIME WITH PARALLEL
+
+    end_time = read_timer();
+    printf("The execution time is %g sec\n", end_time - start_time);
 
     free(nums);
     fflush(stdin);
@@ -139,6 +148,20 @@ void print_array() {
 
 
 // ----- SOME SIMPLE TESTS ----- //
+
+// timer
+double read_timer() {
+    static bool initialized = false;
+    static struct timeval start;
+    struct timeval end;
+    if( !initialized )
+    {
+        gettimeofday( &start, NULL );
+        initialized = true;
+    }
+    gettimeofday( &end, NULL );
+    return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
+}
 
 // test
 void test() {
