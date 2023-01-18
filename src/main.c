@@ -22,7 +22,7 @@ double read_timer() {
     static bool initialized = false;
     static struct timeval start;
     struct timeval end;
-    if( !initialized ) {
+    if(!initialized) {
         gettimeofday( &start, NULL );
         initialized = true;
     }
@@ -43,11 +43,12 @@ int main(int argc, char *argv[]) {
     }
 
     int* arr = generate_array(n);
-    Args args = {arr, 0, n-1, 0};
+    
 
     double start_time = read_timer();
 
     // print_array();
+    Args args = {arr, 0, n-1, 0};
     // quick_sort(&args);
     parallel_quick_sort(&args);
     // print_array();
