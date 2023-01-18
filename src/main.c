@@ -3,21 +3,31 @@
  * 
  * Author: Leo Vainio
  * 
- * Compile: gcc -o quicksort main.c -pthread
+ * Compile: gcc -o quicksort main.c -pthread TODO: UPDATE
  * Run: ./quicksort <size>
  */
 
 #include <pthread.h>
 #include <stdio.h> 
 #include <stdlib.h>
-
 #include <time.h>
-#include <sys/time.h>
 
-#include "main.h"
+#include "data.h"
+#include "quick_sort.h"
 
-int n;
-int* nums;
+// timer, taken from matrix.c given in the course.
+double read_timer() {
+    static bool initialized = false;
+    static struct timeval start;
+    struct timeval end;
+    if( !initialized )
+    {
+        gettimeofday( &start, NULL );
+        initialized = true;
+    }
+    gettimeofday( &end, NULL );
+    return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
+}
 
 // main
 int main(int argc, char *argv[]) {
@@ -25,44 +35,43 @@ int main(int argc, char *argv[]) {
         printf("Invalid argument, usage: ./quicksort <len>\n");
         return 0;
     }
-    
-    n = atoi(argv[1]);
+    int n = atoi(argv[1]);
     if (n < 0) {
         printf("Invalid length of array, can't have negative length\n");
         return 0;
     }
 
-    generate_array();
+    int* arr = generate_array();
+    Args args = {arr, 0, n-1};
 
-    double start_time, end_time;
-    start_time = read_timer();
+    double start_time = read_timer();
 
-    // TIME
-    // print_array();
-    // quick_sort((Args){0, n-1});
-    // print_array();
-    // END TIME
-    // print time taken to execute with normal quicksort
-
-    // TIME
-    Args args = {0, n-1};
     print_array();
-    parallel_quicksort(&args);
+    quick_sort(&args);
     print_array();
-    // END TIME
-    // PRINT TIME WITH PARALLEL
 
-    end_time = read_timer();
+    // print_array();
+    // parallel_quicksort(&args);
+    // print_array();
+
+    double end_time = read_timer();
     printf("The execution time is %g sec\n", end_time - start_time);
 
-    free(nums);
-    fflush(stdin);
+    free_array();
     return 0;
 }
+
+// https://stackoverflow.com/questions/4586405/how-to-get-the-number-of-cpus-in-linux-using-c
+// nr of cores^^^ try it out
 
 // parallel_quicksort is a parallelized implementation of quicksort. 
 void* parallel_quicksort(void* arg) {
     Args *args = arg;
+
+    // TODO: just parallelise down to a certain level and a cutoff point? say like 4 or 8 threads total. that would be like 3 level
+    // 2^3. Look into if pthreads utilizes all cpu cores or if that needs to be set explicitly. 
+
+    // MAYBE CHANGE NR OF CORES ON VIRTUAL MACHINE
 
     int pivot = partition((Args){args->left, args->right}); // maybe parallelize partition later on.
 
@@ -91,80 +100,4 @@ void* parallel_quicksort(void* arg) {
         quick_sort((Args){args->left, pivot - 1});
         quick_sort((Args){pivot + 1, args->right});
     }
-}
-
-// quick_sort is a standard non-parallelized fixed pivot implementation of quicksort.
-void quick_sort(Args args) {
-    if(args.left < args.right) {
-        int pivot = partition((Args){args.left, args.right});
-        quick_sort((Args){args.left, pivot - 1});
-        quick_sort((Args){pivot + 1, args.right});
-	}
-}
-
-// partition picks the last element of the subarray as pivot and places
-// lower elements to the "left" and higher elements to the "right" of the pivot.
-int partition(Args args) {
-    int pivot = nums[args.right];
-    int i = args.left - 1;
-    for(int j = args.left; j < args.right; j++) {
-        if(nums[j] <= pivot) {
-            i++;
-            swap(i, j);
-        }
-    }
-    swap(i + 1, args.right);
-    return i + 1;
-}
-
-// swap swaps two elements of the array nums.
-void swap(int i, int j) {
-    int temp = nums[i];
-    nums[i] = nums[j];
-    nums[j] = temp;
-}
-
-// generate_array fills nums with random integers ranging from 0 to RAND_MAX.
-void generate_array() {
-    srand(time(NULL));
-    nums = (int*) malloc(n * sizeof(int));
-    for (size_t i = 0; i < n; i++) {
-        nums[i] = rand() % 500;
-    }
-}
-
-// print_array prints out the contents of nums.
-void print_array() {
-    printf("nums: {");
-    for (size_t i = 0; i < n; i++) {
-        printf("%d", nums[i]);
-        if (i != n-1) {
-            printf(", ");
-        }
-    }
-    printf("}\n");
-}
-
-
-
-// ----- SOME SIMPLE TESTS ----- //
-
-// timer
-double read_timer() {
-    static bool initialized = false;
-    static struct timeval start;
-    struct timeval end;
-    if( !initialized )
-    {
-        gettimeofday( &start, NULL );
-        initialized = true;
-    }
-    gettimeofday( &end, NULL );
-    return (end.tv_sec - start.tv_sec) + 1.0e-6 * (end.tv_usec - start.tv_usec);
-}
-
-// test
-void test() {
-    // maybe copy array and then run built in sort on it and compare arrays. 
-    // some edge cases. 
 }
