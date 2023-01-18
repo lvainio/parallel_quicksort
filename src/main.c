@@ -41,10 +41,8 @@ int main(int argc, char *argv[]) {
         printf("Invalid length of array, can't have negative length\n");
         return 0;
     }
-
     int* arr = generate_array(n);
     
-
     double start_time = read_timer();
 
     // print_array();

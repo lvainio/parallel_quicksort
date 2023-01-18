@@ -5,6 +5,7 @@
 #include "quick_sort.h"
 
 // TODO: make sure the attribute level is set for all things in this file and main, set to 0 first
+// TODO: cleanup
 
 // parallel_quicksort is a parallelized implementation of quicksort. 
 void* parallel_quick_sort(void* arg) {
@@ -36,7 +37,7 @@ void* parallel_quick_sort(void* arg) {
             }
 
         } else {
-            quick_sort(&left_args);
+            quick_sort(&left_args); // TODO: we could just call parallel quicksort here as well maybe and make sure level is above
             quick_sort(&right_args);
         }
     }
