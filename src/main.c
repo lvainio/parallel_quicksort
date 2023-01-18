@@ -3,25 +3,26 @@
  * 
  * Author: Leo Vainio
  * 
- * Compile: gcc -o quicksort main.c -pthread TODO: UPDATE
- * Run: ./quicksort <size>
+ * Compile: gcc -o quicksort main.c quick_sort.c data.c -pthread
+ * Run: ./quicksort <len>
+ * 
  */
 
-#include <pthread.h>
+#include <stdbool.h>
 #include <stdio.h> 
 #include <stdlib.h>
+#include <sys/time.h>
 #include <time.h>
 
 #include "data.h"
 #include "quick_sort.h"
 
-// timer, taken from matrix.c given in the course.
+// timer returns the current time, taken from matrix.c given in the course ID1217.
 double read_timer() {
     static bool initialized = false;
     static struct timeval start;
     struct timeval end;
-    if( !initialized )
-    {
+    if( !initialized ) {
         gettimeofday( &start, NULL );
         initialized = true;
     }
@@ -41,17 +42,14 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    int* arr = generate_array();
-    Args args = {arr, 0, n-1};
+    int* arr = generate_array(n);
+    Args args = {arr, 0, n-1, 0};
 
     double start_time = read_timer();
 
-    print_array();
-    quick_sort(&args);
-    print_array();
-
     // print_array();
-    // parallel_quicksort(&args);
+    // quick_sort(&args);
+    parallel_quick_sort(&args);
     // print_array();
 
     double end_time = read_timer();
@@ -59,45 +57,4 @@ int main(int argc, char *argv[]) {
 
     free_array();
     return 0;
-}
-
-// https://stackoverflow.com/questions/4586405/how-to-get-the-number-of-cpus-in-linux-using-c
-// nr of cores^^^ try it out
-
-// parallel_quicksort is a parallelized implementation of quicksort. 
-void* parallel_quicksort(void* arg) {
-    Args *args = arg;
-
-    // TODO: just parallelise down to a certain level and a cutoff point? say like 4 or 8 threads total. that would be like 3 level
-    // 2^3. Look into if pthreads utilizes all cpu cores or if that needs to be set explicitly. 
-
-    // MAYBE CHANGE NR OF CORES ON VIRTUAL MACHINE
-
-    int pivot = partition((Args){args->left, args->right}); // maybe parallelize partition later on.
-
-    if(args->right - args->left > 20) { // maybe have this one based on respective partition size instead. 
-        pthread_t t_left;
-        pthread_t t_right;
-
-        Args left_args = {args->left, pivot - 1};
-        if(pthread_create(&t_left, NULL, parallel_quicksort, &left_args) != 0) {
-            fprintf(stderr, "Creating thread failed");
-        } 
-
-        Args right_args = {pivot + 1, args->right};
-        if(pthread_create(&t_right, NULL, parallel_quicksort, &right_args) != 0) {
-            fprintf(stderr, "Creating thread failed");
-        } 
-
-        if(pthread_join(t_left, NULL) != 0) {
-            fprintf(stderr, "Joining thread failed");
-        }
-
-        if(pthread_join(t_right, NULL) != 0) {
-            fprintf(stderr, "Joining thread failed");
-        }
-    } else {
-        quick_sort((Args){args->left, pivot - 1});
-        quick_sort((Args){pivot + 1, args->right});
-    }
 }
