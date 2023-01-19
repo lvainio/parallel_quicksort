@@ -4,58 +4,39 @@
 
 #include "quick_sort.h"
 
-// TODO: make sure the attribute level is set for all things in this file and main, set to 0 first
-// TODO: cleanup
-
 // parallel_quicksort is a parallelized implementation of quicksort. 
-void* parallel_quick_sort(void* arg) {
+void* parallel_quicksort(void* arg) {
     Args *args = arg;
     int left = args->left;
     int right = args->right;
     int level = args->level;
-    int pivot = partition(args);
-    Args left_args = {args->arr, left, pivot-1, level+1}; // TODO: make sure we konw exactly how many threads are created. 
-    Args right_args = {args->arr, pivot+1, right, level+1};
-
-    if(left < right) {
-        if((right - left > 20) && (args->level <= MAX_LEVEL)) { // TODO: maybe do this as a per partition thing instead. i.e pivot-left, right-pivot, right - left > 20) because correctness maybe an issue here
-            pthread_t t_left;
-            pthread_t t_right;
-
-            if(pthread_create(&t_left, NULL, parallel_quick_sort, &left_args) != 0) {
-                fprintf(stderr, "Creating thread failed");
-            } 
-            if(pthread_create(&t_right, NULL, parallel_quick_sort, &right_args) != 0) {
-                fprintf(stderr, "Creating thread failed");
-            } 
-
-            if(pthread_join(t_left, NULL) != 0) {
-                fprintf(stderr, "Joining thread failed");
-            }
-            if(pthread_join(t_right, NULL) != 0) {
-                fprintf(stderr, "Joining thread failed");
-            }
-
-        } else {
-            quick_sort(&left_args); // TODO: we could just call parallel quicksort here as well maybe and make sure level is above
-            quick_sort(&right_args);
-        }
+    
+    if(left >= right) {
+        return NULL;
     }
-} 
 
+    int pivot = partition(args);
+    Args args_left = {args->arr, left, pivot-1, level+1}; 
+    Args args_right = {args->arr, pivot+1, right, level+1};
 
-// quick_sort is a standard non-parallelized fixed pivot implementation of quicksort.
-// The last element in the subarray is used as pivot.
-void quick_sort(Args* args) {
-    int left = args->left;
-    int right = args->right;
-    if(left < right) {
-        int pivot = partition(args);
-        Args left_args = {args->arr, left, pivot-1, 0};
-        Args right_args = {args->arr, pivot+1, right, 0};
-        quick_sort(&left_args);
-        quick_sort(&right_args);
-	}
+    if (level < MAX_LEVEL) {
+        pthread_t t_left;
+        pthread_t t_right;
+
+        if(pthread_create(&t_left, NULL, parallel_quicksort, &args_left) != 0)
+            fprintf(stderr, "Creating thread failed");
+        if(pthread_create(&t_right, NULL, parallel_quicksort, &args_right) != 0)
+            fprintf(stderr, "Creating thread failed");
+
+        if(pthread_join(t_left, NULL) != 0)
+            fprintf(stderr, "Joining thread failed");
+        if(pthread_join(t_right, NULL) != 0)
+            fprintf(stderr, "Joining thread failed");
+
+    } else {
+        parallel_quicksort(&args_left);
+        parallel_quicksort(&args_right);
+    }
 }
 
 // partition picks the last element of the subarray as pivot and places
@@ -82,27 +63,40 @@ void swap(int* arr, int i, int j) {
     arr[j] = temp;
 }
 
-// ----- BENCHMARKS ----- //
+// ----- BENCHMARKS (time given in seconds) ----- //
 
-// standard implementation:
+// fully sequential (MAX_LEVEL = 1):
+// n = 100 000:         0.011607, 0.011925, 0.011705 
+// n = 1 000 000:       0.143727, 0.145697, 0.178966 
+// n = 10 000 000:      2.01987, 2.12878, 2.20362
+// n = 100 000 000:     23.065, 23.2824, 22.9335
 
-// n = 100 000:     0.011496, 0.011918, 0.012469 (seconds)
-// n = 1 000 000:   0.163922, 0.152957, 0.16318 (seconds)
-// n = 10 000 000:  2.06777, 1.92765, 1.82644 (seconds)
-// n = 100 000 000: 21.7889, 22.7262, 22.9358 (seconds)
+// parallel implementation (MAX_LEVEL = 2):
+// n = 100 000:         0.008313, 0.008726, 0.008704
+// n = 1 000 000:       0.158295, 0.09582, 0.173933
+// n = 10 000 000:      1.15495, 1.62315, 1.72717
+// n = 100 000 000:     17.589, 16.6441, 20.2575
 
-// parallel implementation: (MAX_LEVEL = 4)
-// n = 100 000:     0.004884, 0.005622, 0.004693 (seconds)
-// n = 1 000 000:   0.04353, 0.091076, 0.049347 (seconds)
-// n = 10 000 000:  0.401032, 0.526276, 0.558398 (seconds)
-// n = 100 000 000: 6.10673, 12.3149, 4.88736 (seconds)
-// n = 1 000 000 000 : 124.951 (seconds)
+// parallel implementation (MAX_LEVEL = 4):
+// n = 100 000:         0.00794, 0.007987, 0.004754
+// n = 1 000 000:       0.060891, 0.099068, 0.098563
+// n = 10 000 000:      0.826437, 1.36594, 0.968509
+// n = 100 000 000:     14.9867, 8.54499, 6.3723
 
-// parallel implementation: (MAX_LEVEL = 8)
-// n = 100 000 000: 5.06814, 4.50018, 3.91338
+// parallel implementation (MAX_LEVEL = 8):
+// n = 100 000:         0.008933, 0.009584, 0.009171    
+// n = 1 000 000:       0.043686, 0.047184, 0.037065
+// n = 10 000 000:      0.388953, 0.560401, 0.414454
+// n = 100 000 000:     7.84743, 6.04248, 7.15438
 
-// parallel implementation: (MAX_LEVEL = 12)
-// n = 100 000 000: 4.51871, 3.94922, 4.3525
+// parallel implementation (MAX_LEVEL = 12):
+// n = 100 000:         0.104786, 0.080181, 0.090653
+// n = 1 000 000:       0.130178, 0.116954, 0.126627
+// n = 10 000 000:      0.689073, 0.457411, 0.472586
+// n = 100 000 000:     4.8749, 4.44355, 4.59349
 
-// parallel implementation: (MAX_LEVEL = 2)
-// n = 100 000 000: 15.0405
+// parallel implementation (MAX_LEVEL = 16):
+// n = 100 000:         0.561164, 0.599422, 0.572329
+// n = 1 000 000:       1.18521, 1.08798, 1.09963
+// n = 10 000 000:      1.62332, 1.53492, 1.80322
+// n = 100 000 000:     5.14809, 5.08067, 5.22745

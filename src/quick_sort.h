@@ -1,7 +1,7 @@
 #ifndef QUICK_SORT_H
 #define QUICK_SORT_H
 
-#define MAX_LEVEL 2
+#define MAX_LEVEL 16
 
 typedef struct {
     int* arr;
@@ -10,7 +10,7 @@ typedef struct {
     int level;
 } Args;
 
-void* parallel_quick_sort(void*);
+void* parallel_quicksort(void*);
 void quick_sort(Args*);
 int partition(Args*);
 void swap(int*, int, int);

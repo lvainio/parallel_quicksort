@@ -44,13 +44,8 @@ int main(int argc, char *argv[]) {
     int* arr = generate_array(n);
     
     double start_time = read_timer();
-
-    // print_array();
-    Args args = {arr, 0, n-1, 0};
-    // quick_sort(&args);
-    parallel_quick_sort(&args);
-    // print_array();
-
+    Args args = {arr, 0, n-1, 1};
+    parallel_quicksort(&args);
     double end_time = read_timer();
     printf("The execution time is %g sec\n", end_time - start_time);
 
