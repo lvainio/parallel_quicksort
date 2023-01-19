@@ -104,5 +104,5 @@ void swap(int* arr, int i, int j) {
 // parallel implementation: (MAX_LEVEL = 12)
 // n = 100 000 000: 4.51871, 3.94922, 4.3525
 
-// parallel implementation: (MAX_LEVEL = 12)
+// parallel implementation: (MAX_LEVEL = 2)
 // n = 100 000 000: 15.0405
